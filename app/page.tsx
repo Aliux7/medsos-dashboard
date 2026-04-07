@@ -20,7 +20,7 @@ export default function Home() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/youtube/${encodeURIComponent("suli")}`);
+      const res = await fetch(`/api/youtube/${encodeURIComponent("suliantoindriaputra")}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Unknown error");
       const latestPosts: Post[] = (json.latestVideos ?? [])
@@ -33,6 +33,7 @@ export default function Home() {
           likeCount: Number(v.likeCount ?? 0),
           commentCount: Number(v.commentCount ?? 0),
           viewCount: Number(v.viewCount ?? 0),
+          type: "Video",
           createdAt: v.publishedAt,
         }));
 
@@ -42,8 +43,54 @@ export default function Home() {
         thumbnail: json.channel.thumbnails?.default ?? "",
         description: json.channel.description,
         followers: Number(json.channel.subscriberCount ?? 0),
+        following: Number(0),
+        type: "Instagram",
         videoCount: Number(json.channel.videoCount ?? 0),
         viewCount: Number(json.channel.viewCount ?? 0),
+        latestPosts,
+      };
+
+      console.log(result);
+      setSocialMediaData(result);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getInstagram = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/instagram/estefaniawijaya");
+      const data = await res.json();
+      if (data.error) throw new Error(data.error ?? "Unknown error");
+      console.log(data);
+      const latestPosts: Post[] = (data.latestPosts ?? [])
+        .slice(0, 5)
+        .map((v: any) => ({
+          id: v.id,
+          title: v.title,
+          thumbnail: v.thumbnail ?? "",
+          description: v.description,
+          likeCount: Number(v.likeCount ?? 0),
+          commentCount: Number(v.commentCount ?? 0),
+          viewCount: Number(v.viewCount ?? 0),
+          type: v.type,
+          createdAt: v.createdAt,
+        }));
+
+      const result = {
+        id: data.id,
+        username: data.username,
+        thumbnail: data.thumbnail ?? "",
+        description: data.description,
+        followers: Number(data.followers ?? 0),
+        following: Number(data.following ?? 0),
+        type: "Instagram",
+        videoCount: Number(data.videoCount ?? 0),
+        viewCount: Number(data.viewCount ?? 0),
         latestPosts,
       };
 
@@ -55,47 +102,9 @@ export default function Home() {
     }
   };
 
-  const fetchInstagram = async () => {
-    const url = "https://instagram120.p.rapidapi.com/api/instagram/posts";
-    const options = {
-      method: "POST",
-      headers: {
-        "x-rapidapi-host": "instagram120.p.rapidapi.com",
-        "x-rapidapi-key": "8fbd109620msh6a39966d21e438cp1278fejsn7cf233b72259",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: "estefaniawijaya",
-        maxId: "",
-      }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(
-          `HTTP ${response.status} – ${response.statusText}\n${errText}`,
-        );
-      }
-
-      const result = await response.json();
-      console.log("id:", result?.result?.edges[0]?.node?.user?.id);
-      console.log("username:", result?.result?.edges[0]?.node?.user?.username);
-      console.log("thumbnail:", result?.result?.edges[0]?.node?.user?.hd_profile_pic_url_info?.url);
-      console.log("thumbnail:", result?.result?.edges[0]?.node?.user?.hd_profile_pic_url_info?.url);
-
-      console.log("✅ Instagram single post:", result?.result?.edges[0]?.node);
-      console.log("✅ Instagram single post:", result?.result?.edges[6]?.node);
-      console.log("✅ Instagram single post:", result?.result?.edges[11]?.node);
-    } catch (error) {
-      console.error("❌ Fetch error:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchInstagram();
     // fetchInfo();
+    getInstagram();
   }, []);
 
   return (
@@ -114,10 +123,10 @@ export default function Home() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <SectionCards data={socialMediaData} />
+              <DataTable data={socialMediaData} />
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive />
               </div>
-              <DataTable data={data} />
             </div>
           </div>
         </div>

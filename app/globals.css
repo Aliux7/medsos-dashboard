@@ -3,6 +3,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer / Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 /* :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -74,7 +83,7 @@
   --sidebar-ring: oklch(0.439 0 0);
 } */
 
-:root { 
+:root {
   --background: oklch(0.15 0 0); /* near black */
   --foreground: oklch(0.98 0 0); /* white */
 

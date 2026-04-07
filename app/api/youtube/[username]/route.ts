@@ -1,4 +1,3 @@
-// app/api/youtube/[username]/route.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -9,9 +8,6 @@ import {
   getVideosInfo,
 } from "@/lib/youtube";
 
-/* -----------------------------------------------------------------
-   Types – the shape we will return to the client
-   ----------------------------------------------------------------- */
 type CombinedResponse = {
   channel: null | {
     id: string;
@@ -43,13 +39,7 @@ type CombinedResponse = {
   error: null | string;
 };
 
-/* -----------------------------------------------------------------
-   Helper – builds the JSON payload we send back
-   ----------------------------------------------------------------- */
-function buildSuccess(
-  channelInfo: any,
-  videosInfo: any[]
-): CombinedResponse {
+function buildSuccess(channelInfo: any, videosInfo: any[]): CombinedResponse {
   return {
     channel: {
       id: channelInfo.id,
@@ -82,16 +72,9 @@ function buildSuccess(
   };
 }
 
-/* -----------------------------------------------------------------
-   GET handler – the only HTTP verb we support
-   ----------------------------------------------------------------- */
 export async function GET(request: NextRequest) {
-  // --------------------------------------------------------------
-  // 1️⃣  Extract the dynamic segment (username)
-  // --------------------------------------------------------------
   const { pathname } = new URL(request.url);
-  // pathname is like "/api/youtube/astronacciinternational"
-  const username = pathname.split("/").pop(); // last part
+  const username = pathname.split("/").pop();
 
   if (!username) {
     return NextResponse.json(
@@ -100,14 +83,11 @@ export async function GET(request: NextRequest) {
         latestVideos: [],
         error: "Missing username in URL",
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   try {
-    // --------------------------------------------------------------
-    // 2️⃣  Resolve channelId from the custom URL (username)
-    // --------------------------------------------------------------
     const channelId = await getChannelIdByUsername(username);
 
     if (!channelId) {
@@ -117,26 +97,16 @@ export async function GET(request: NextRequest) {
           latestVideos: [],
           error: `Channel with username "${username}" not found`,
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    // --------------------------------------------------------------
-    // 3️⃣  Parallel‑fetch channel details + latest video ids
-    // --------------------------------------------------------------
     const [channelInfo, latestIds] = await Promise.all([
       getChannelInfo(channelId),
-      getLatestVideoIds(channelId, 5), // change 5 if you want more/less
+      getLatestVideoIds(channelId, 5),
     ]);
 
-    // --------------------------------------------------------------
-    // 4️⃣  Get full video details
-    // --------------------------------------------------------------
     const videosInfo = await getVideosInfo(latestIds);
-
-    // --------------------------------------------------------------
-    // 5️⃣  Build & return the combined payload
-    // --------------------------------------------------------------
     const payload = buildSuccess(channelInfo, videosInfo);
     return NextResponse.json(payload, { status: 200 });
   } catch (err: any) {
@@ -147,22 +117,19 @@ export async function GET(request: NextRequest) {
         latestVideos: [],
         error: err.message ?? "Unexpected server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-/* -----------------------------------------------------------------
-   OPTIONAL: Disallow other methods (POST, PUT, DELETE …)
-   ----------------------------------------------------------------- */
 export const POST = () =>
   NextResponse.json(
     {
       channel: null,
       latestVideos: [],
-      error: "Method Not Allowed – only GET is supported",
+      error: "Method Not Allowed - only GET is supported",
     },
-    { status: 405 }
+    { status: 405 },
   );
 export const PUT = POST;
 export const DELETE = POST;

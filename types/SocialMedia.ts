@@ -7,6 +7,7 @@ export type Post = {
   commentCount: number;
   viewCount: number;
   createdAt: string;
+  type: string;
 };
 
 export type SocialMedia = {
@@ -15,6 +16,8 @@ export type SocialMedia = {
   thumbnail: string;
   description: string;
   followers: number;
+  following?: number;
+  type?: string;
   videoCount: number;
   viewCount: number;
   latestPosts: Post[];
