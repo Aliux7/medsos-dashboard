@@ -8,19 +8,22 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import data from "./data.json";
 import { useEffect, useState } from "react";
 import { Post, SocialMedia } from "@/types/SocialMedia";
+import Loading from "@/components/loading";
 
 export default function Home() {
+  const [platform, setPlatform] = useState("youtube");
+  const [username, setUsername] = useState("suliantoindriaputra");
   const [socialMediaData, setSocialMediaData] = useState<SocialMedia | null>(
     null,
   );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchInfo = async () => {
+  const fetchYouTube = async (username: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/youtube/${encodeURIComponent("suliantoindriaputra")}`);
+      const res = await fetch(`/api/youtube/${encodeURIComponent(username)}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Unknown error");
       const latestPosts: Post[] = (json.latestVideos ?? [])
@@ -59,11 +62,11 @@ export default function Home() {
     }
   };
 
-  const getInstagram = async () => {
+  const fetchInstagram = async (username: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/instagram/estefaniawijaya");
+      const res = await fetch(`/api/instagram/${username}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error ?? "Unknown error");
       console.log(data);
@@ -102,10 +105,14 @@ export default function Home() {
     }
   };
 
+  const handleSearch = () => {
+    if (platform === "youtube") fetchYouTube(username);
+    else fetchInstagram(username);
+  };
+
   useEffect(() => {
-    // fetchInfo();
-    getInstagram();
-  }, []);
+    handleSearch();
+  }, [platform]);
 
   return (
     <SidebarProvider
@@ -118,7 +125,13 @@ export default function Home() {
     >
       {/* <AppSidebar variant="inset" /> */}
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader
+          username={username}
+          onUsernameChange={setUsername}
+          selectedPlatform={platform}
+          onPlatformChange={setPlatform}
+          onSearch={handleSearch}
+        />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -131,6 +144,7 @@ export default function Home() {
           </div>
         </div>
       </SidebarInset>
+      {loading && <Loading />}
     </SidebarProvider>
   );
 }

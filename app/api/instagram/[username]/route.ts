@@ -70,7 +70,7 @@ export async function GET(req: Request) {
     const edges = rapidJson?.result?.edges ?? [];
 
     const latestPosts =
-      edges.slice(0, 5).map((p: any) => {
+      edges.slice(0, 10).map((p: any) => {
         const n = p.node; 
         return {
           id: n.id,
