@@ -69,20 +69,22 @@ export async function GET(req: Request) {
 
     const edges = rapidJson?.result?.edges ?? [];
 
+    console.log(edges[4].node.video_versions)
+
     const latestPosts =
       edges.slice(0, 10).map((p: any) => {
         const n = p.node; 
         return {
           id: n.id,
           title: "",
-          thumbnail: n.image_versions2.candidates[0].url ?? "",
-          description: n.caption.text ?? "",
-          likeCount: Number(n.like_count ?? 0),
-          commentCount: Number(n.comment_count ?? 0),
-          viewCount: Number(n.view_count ?? 0),
-          type: n.video_versions ? "Video" : "Image",
-          createdAt: n.taken_at
-            ? new Date(n.taken_at * 1000).toISOString()
+          thumbnail: n?.image_versions2?.candidates[0]?.url ?? "",
+          description: n?.caption?.text ?? "",
+          likeCount: Number(n?.like_count ?? 0),
+          commentCount: Number(n?.comment_count ?? 0),
+          viewCount: Number(n?.view_count ?? 0),
+          type: n?.video_versions ? "Video" : "Image",
+          createdAt: n?.taken_at
+            ? new Date(n?.taken_at * 1000).toISOString()
             : null,
         };
       }) ?? [];

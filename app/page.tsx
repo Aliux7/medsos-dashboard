@@ -19,7 +19,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchYouTube = async (username: string) => {
+  const fetchYouTube = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -52,24 +52,23 @@ export default function Home() {
         viewCount: Number(json.channel.viewCount ?? 0),
         latestPosts,
       };
-
-      console.log(result);
+ 
       setSocialMediaData(result);
     } catch (e: any) {
       setError(e.message);
+      console.log(e.message)
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchInstagram = async (username: string) => {
+  const fetchInstagram = async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`/api/instagram/${username}`);
       const data = await res.json();
-      if (data.error) throw new Error(data.error ?? "Unknown error");
-      console.log(data);
+      if (data.error) throw new Error(data.error ?? "Unknown error"); 
       const latestPosts: Post[] = (data.latestPosts ?? [])
         .slice(0, 5)
         .map((v: any) => ({
@@ -100,14 +99,33 @@ export default function Home() {
       setSocialMediaData(result);
     } catch (e: any) {
       setError(e.message);
+      console.log(e.message)
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = () => {
-    if (platform === "youtube") fetchYouTube(username);
-    else fetchInstagram(username);
+  const handleSearch = async () => {
+    
+    const rapid = await fetch(
+      "https://instagram120.p.rapidapi.com/api/instagram/posts",
+      {
+        method: "POST",
+        headers: {
+          "x-rapidapi-host": "instagram120.p.rapidapi.com",
+          "x-rapidapi-key":
+            "8fbd109620msh6a39966d21e438cp1278fejsn7cf233b72259",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, maxId: "" }),
+      },
+    );
+
+    const rapidJson = await rapid.json();
+    console.log(rapidJson?.result?.edges)
+
+    if (platform === "youtube") fetchYouTube();
+    else fetchInstagram();
   };
 
   useEffect(() => {
@@ -123,7 +141,7 @@ export default function Home() {
         } as React.CSSProperties
       }
     >
-      {/* <AppSidebar variant="inset" /> */}
+      {/* <AppSidebar variant="inset" /> */} 
       <SidebarInset>
         <SiteHeader
           username={username}
