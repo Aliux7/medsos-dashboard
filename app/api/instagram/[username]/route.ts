@@ -69,11 +69,12 @@ export async function GET(req: Request) {
 
     const edges = rapidJson?.result?.edges ?? [];
 
-    console.log(edges[4].node.video_versions)
+    // console.log(edges[4]?.node.video_versions)
 
+    console.log(edges)
     const latestPosts =
       edges.slice(0, 10).map((p: any) => {
-        const n = p.node; 
+        const n = p?.node; 
         return {
           id: n.id,
           title: "",
